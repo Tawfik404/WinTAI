@@ -1,42 +1,42 @@
 [
-    {
-        "id": "open_app",
-        "description": "Open an installed Windows application"
-    },
-    {
-        "id": "shutdown_pc",
-        "description": "Shutdown the computer"
-    },
-    {
-        "id": "restart_pc",
-        "description": "Restart the computer"
-    },
-    {
-        "id": "hibernate_pc",
-        "description": "Hibernate the computer"
-    },
-    {
-        "id": "lock_pc",
-        "description": "Lock the workstation"
-    },
-    {
-        "id": "open_url",
-        "description": "Open a URL in the default browser"
-    },
-    {
-        "id": "open_folder",
-        "description": "Open a file explorer window at a specified path"
-    },
-    {
-        "id": "get_system_info",
-        "description": "Retrieve system information such as OS version and hardware specs"
-    },
-    {
-        "id": "get_clipboard",
-        "description": "Read the current clipboard content"
-    },
-    {
-        "id": "set_clipboard",
-        "description": "Write text to the clipboard"
-    }
+  {
+    "id": "open_app",
+    "description": "Launch or start any installed application on Windows like Discord, Notepad, Spotify, or calculator"
+  },
+  {
+    "id": "shutdown_pc",
+    "description": "Power off or shut down the computer completely to turn it off"
+  },
+  {
+    "id": "restart_pc",
+    "description": "Reboot or restart the computer to refresh the system"
+  },
+  {
+    "id": "hibernate_pc",
+    "description": "Put the computer into hibernate or sleep mode to save power"
+  },
+  {
+    "id": "lock_pc",
+    "description": "Lock the workstation or computer screen to secure it"
+  },
+  {
+    "id": "open_url",
+    "description": "Open a website link or URL in the default browser like Chrome or Firefox"
+  },
+  {
+    "id": "open_folder",
+    "description": "Open a file explorer window to browse files at a specific path or directory"
+  },
+  {
+    "id": "get_system_info",
+    "description": "Retrieve system information like Windows version, CPU, RAM, and hardware specs"
+  },
+  {
+    "id": "get_clipboard",
+    "description": "Read or get the current text content stored in the clipboard"
+  },
+  {
+    "id": "set_clipboard",
+    "description": "Copy or write text to the clipboard so it can be pasted elsewhere"
+  }
 ]
