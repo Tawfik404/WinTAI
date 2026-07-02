@@ -1,0 +1,147 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  height: 100%;
+  transition: width 0.2s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.expanded {
+  width: var(--sidebar-width);
+}
+
+.collapsed {
+  width: var(--sidebar-collapsed);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.logoIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.collapseBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.collapseBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.newChatBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.newChatBtn:hover {
+  background: var(--bg-hover);
+}
+
+.newChatBtn svg {
+  flex-shrink: 0;
+}
+
+.collapsedNewChat {
+  margin: 0 8px;
+  padding: 10px;
+  justify-content: center;
+}
+
+.conversationList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.bottomSection {
+  padding: 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.settingsBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color 0.15s, background 0.15s;
+}
+
+.settingsBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.collapsedSettingsBtn {
+  justify-content: center;
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  .expanded {
+    width: 100%;
+    position: fixed;
+    z-index: 50;
+  }
+
+  .collapsed {
+    width: 0;
+    border-right: none;
+  }
+}

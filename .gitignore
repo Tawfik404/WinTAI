@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# Node
+node_modules/
+
+# Build output
+dist-frontend/
+dist-electron/
+apps/frontend/dist/
+apps/frontend/release/
+
+# Environment
+.env
+.env.local
+apps/backend/.env
+
+# TypeScript build artifacts (packages)
+packages/*/dist/
+
+# Editor
+.vscode/
+.idea/
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,42 @@
+[
+    {
+        "id": "open_app",
+        "description": "Open an installed Windows application"
+    },
+    {
+        "id": "shutdown_pc",
+        "description": "Shutdown the computer"
+    },
+    {
+        "id": "restart_pc",
+        "description": "Restart the computer"
+    },
+    {
+        "id": "hibernate_pc",
+        "description": "Hibernate the computer"
+    },
+    {
+        "id": "lock_pc",
+        "description": "Lock the workstation"
+    },
+    {
+        "id": "open_url",
+        "description": "Open a URL in the default browser"
+    },
+    {
+        "id": "open_folder",
+        "description": "Open a file explorer window at a specified path"
+    },
+    {
+        "id": "get_system_info",
+        "description": "Retrieve system information such as OS version and hardware specs"
+    },
+    {
+        "id": "get_clipboard",
+        "description": "Read the current clipboard content"
+    },
+    {
+        "id": "set_clipboard",
+        "description": "Write text to the clipboard"
+    }
+]

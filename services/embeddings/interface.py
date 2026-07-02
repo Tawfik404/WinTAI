@@ -1,0 +1,19 @@
+from typing import Protocol
+
+
+class EmbeddingsService(Protocol):
+    def initialize(self) -> None: ...
+
+    def embed(self, text: str) -> list[float]: ...
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]: ...
+
+    def search(
+        self, query_text: str, top_k: int = 5
+    ) -> list[tuple[str, float]]: ...
+
+    def get_dimension(self) -> int: ...
+
+    def build_index(
+        self, tool_descriptions: list[tuple[str, str]]
+    ) -> None: ...
