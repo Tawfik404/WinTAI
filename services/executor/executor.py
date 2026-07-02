@@ -20,6 +20,8 @@ class ToolExecutor:
             return _failure(tool_name, str(e))
 
         tool_def = get_tool(tool_name)
+        if tool_def is None:
+            return _failure(tool_name, f"Unknown tool: {tool_name}")
         handler = _load_handler(tool_def["handler"])
         if handler is None:
             return _failure(tool_name, f"Handler not found for tool: {tool_name}")

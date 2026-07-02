@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.core.config import get_settings
 from services.app_resolver import AppResolver
+from services.tools import tool_registry
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -72,10 +73,20 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
 
     tool_def = registry.get_tool(tool_id)
     if not tool_def:
+        all_ids = [t["id"] for t in tool_registry.list_tools()]
+        suggestion = ""
+        from difflib import get_close_matches
+        close = get_close_matches(tool_id, all_ids, n=1, cutoff=0.5)
+        if close:
+            suggestion = close[0]
+        logger.error(
+            "[SAFETY] Tool '%s' not in registry. Suggestion: %s",
+            tool_id, suggestion or "none",
+        )
         return ChatResponse(
-            response="Tool identified but definition not found.",
+            response=f"Tool not found in registry",
             status="Failed",
-            reason="Tool definition missing.",
+            reason=f"Tool '{tool_id}' is not registered",
         )
 
     tool_info = ChatToolInfo(
