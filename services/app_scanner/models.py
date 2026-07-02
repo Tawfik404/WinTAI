@@ -7,6 +7,7 @@ class App:
     path: str
     source: str
     confidence: float
+    aliases: list[str] = field(default_factory=list)
 
 
 @dataclass

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -9,6 +9,7 @@ class AppVector:
     path: str
     source: str
     embedding: np.ndarray
+    alias_embeddings: list[np.ndarray] = field(default_factory=list)
 
 
 class AppIndex:

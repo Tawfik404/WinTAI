@@ -1,0 +1,48 @@
+KNOWN_EXECUTABLES: dict[str, str] = {
+    "chrome": "chrome.exe",
+    "google chrome": "chrome.exe",
+    "chromium": "chrome.exe",
+    "edge": "msedge.exe",
+    "microsoft edge": "msedge.exe",
+    "postman": "Postman.exe",
+    "discord": "Discord.exe",
+    "slack": "slack.exe",
+    "spotify": "Spotify.exe",
+    "steam": "steam.exe",
+    "vlc": "vlc.exe",
+    "vlc media player": "vlc.exe",
+    "visual studio code": "Code.exe",
+    "vs code": "Code.exe",
+    "vscode": "Code.exe",
+    "code": "Code.exe",
+    "powershell": "PowerShell.exe",
+    "pwsh": "pwsh.exe",
+    "windows terminal": "WindowsTerminal.exe",
+    "cmd": "cmd.exe",
+    "notepad": "notepad.exe",
+    "notepad++": "notepad++.exe",
+    "calculator": "calculator.exe",
+    "paint": "mspaint.exe",
+    "word": "WINWORD.EXE",
+    "excel": "EXCEL.EXE",
+    "powerpoint": "POWERPNT.EXE",
+    "outlook": "OUTLOOK.EXE",
+    "teams": "Teams.exe",
+    "microsoft teams": "Teams.exe",
+    "zoom": "Zoom.exe",
+    "obsidian": "Obsidian.exe",
+}
+
+SEARCH_PATHS: list[str] = [
+    r"C:\Program Files",
+    r"C:\Program Files (x86)",
+    r"%LOCALAPPDATA%\Programs",
+    r"%APPDATA%",
+    r"%LOCALAPPDATA%",
+]
+
+SKIP_EXE_KEYWORDS: list[str] = [
+    "unins", "setup", "update", "install",
+    "redist", "vcredist", "dotnet", "dxsetup",
+    "eula", "license", "readme", "gsdll",
+]

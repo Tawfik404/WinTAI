@@ -4,9 +4,13 @@ import logging
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
+from app.core.config import get_settings
+from services.app_resolver import AppResolver
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+_resolver = AppResolver()
 _URL_RE = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
 
@@ -30,23 +34,43 @@ class ChatResponse(BaseModel):
 
 @router.post("/api/chat")
 async def chat(body: ChatRequest, request: Request) -> ChatResponse:
+    settings = get_settings()
     embedder = request.app.state.embedder
     registry = request.app.state.registry
     app_embedder = getattr(request.app.state, "app_embedder", None)
     executor = getattr(request.app.state, "executor", None)
 
-    results = embedder.search(body.message, top_k=1)
+    logger.info("[QUERY] %s", body.message)
 
-    if not results or results[0][1] < 0.25:
+    results = embedder.search(body.message, top_k=5)
+
+    if not results:
+        logger.info("[TOOL MATCH] none | Score: 0.0 | Decision: NO_MATCH (no results)")
         return ChatResponse(
             response="No matching tool found for your request.",
             status="Failed",
             reason="No matching tool found for your request.",
         )
 
-    tool_id, score = results[0]
-    tool_def = registry.get_tool(tool_id)
+    logger.info("[TOOL MATCH] candidates=%s", [(tid, round(s, 4)) for tid, s in results])
 
+    tool_id, score = results[0]
+    threshold = settings.tool_similarity_threshold
+
+    # Fallback: use best candidate even if below threshold
+    fallback_used = score < threshold
+    if fallback_used:
+        logger.info(
+            "[TOOL MATCH] %s (%.2f) | Threshold: %.2f | Decision: FALLBACK (best available)",
+            tool_id, score, threshold,
+        )
+    else:
+        logger.info(
+            "[TOOL MATCH] %s (%.2f) | Threshold: %.2f | Decision: ACCEPTED",
+            tool_id, score, threshold,
+        )
+
+    tool_def = registry.get_tool(tool_id)
     if not tool_def:
         return ChatResponse(
             response="Tool identified but definition not found.",
@@ -60,9 +84,12 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
         description=tool_def.get("description", ""),
     )
 
-    params = _resolve_params(tool_id, body.message, app_embedder)
+    params = _resolve_params(
+        tool_id, body.message, app_embedder, settings
+    )
 
     if params is None:
+        logger.info("[DECISION] fallback_used=%s | params=None", fallback_used)
         return ChatResponse(
             response=f"Matched tool '{tool_id}' but could not resolve parameters.",
             tool=tool_info,
@@ -107,16 +134,35 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
 
 
 def _resolve_params(
-    tool_id: str, message: str, app_embedder
+    tool_id: str, message: str, app_embedder, settings=None
 ) -> dict | None:
     if tool_id == "open_app":
         if not app_embedder or app_embedder.get_index_size() == 0:
             return None
+
         result = app_embedder.search(message)
-        path = result.get("path", "")
-        if not path or result.get("confidence", 0) < 0.3:
+        app_name = result.get("name", "")
+        raw_path = result.get("path", "")
+        confidence = result.get("confidence", 0)
+        threshold = settings.app_similarity_threshold if settings else 0.55
+
+        logger.info("[APP MATCHES]")
+        logger.info("  1. %s (%.2f)", app_name, confidence)
+
+        resolved_path = _resolver.resolve(raw_path, app_name)
+        logger.info("[RESOLVED PATH] %s", resolved_path)
+
+        fallback_used = confidence < threshold
+        logger.info(
+            "[DECISION] fallback_used=%s confidence=%.2f threshold=%.2f",
+            fallback_used, confidence, threshold,
+        )
+
+        if not resolved_path or not resolved_path.lower().endswith(".exe"):
+            logger.info("[DECISION] REJECTED: no valid .exe path")
             return None
-        return {"app_path": path}
+
+        return {"app_path": resolved_path}
 
     if tool_id == "open_url":
         match = _URL_RE.search(message)

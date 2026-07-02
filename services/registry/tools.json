@@ -1,42 +1,118 @@
 [
   {
     "id": "open_app",
-    "description": "Launch or start any installed application on Windows like Discord, Notepad, Spotify, or calculator"
+    "description": "Launch or start any installed application on Windows. Use when the user wants to open an app, run a program, start software, or execute something like a browser, editor, game, media player, or any desktop application.",
+    "examples": [
+      "open Chrome",
+      "launch Discord",
+      "run Steam",
+      "start Visual Studio Code",
+      "open Spotify",
+      "open Edge browser",
+      "open app",
+      "launch app",
+      "start application",
+      "run program"
+    ]
   },
   {
     "id": "shutdown_pc",
-    "description": "Power off or shut down the computer completely to turn it off"
+    "description": "Power off the Windows computer completely. Use when the user wants to turn off, switch off, or shut down their machine for the day or to save power.",
+    "examples": [
+      "shut down my PC",
+      "turn off computer",
+      "power off laptop",
+      "shut down Windows",
+      "switch off my machine"
+    ]
   },
   {
     "id": "restart_pc",
-    "description": "Reboot or restart the computer to refresh the system"
+    "description": "Reboot the Windows computer so it starts fresh. Use when the user wants to refresh the system, apply updates, or restart after installing new software.",
+    "examples": [
+      "restart my computer",
+      "reboot the PC",
+      "restart Windows",
+      "reboot the system",
+      "restart my machine"
+    ]
   },
   {
     "id": "hibernate_pc",
-    "description": "Put the computer into hibernate or sleep mode to save power"
+    "description": "Put the Windows computer into a low-power sleep or hibernate state preserving the current session. Use when the user wants to conserve battery or step away temporarily without shutting down.",
+    "examples": [
+      "put PC to sleep",
+      "hibernate computer",
+      "sleep mode",
+      "suspend Windows",
+      "put my laptop to sleep"
+    ]
   },
   {
     "id": "lock_pc",
-    "description": "Lock the workstation or computer screen to secure it"
+    "description": "Lock the Windows workstation so a password is needed to regain access. Use when the user is stepping away from their desk and wants to prevent others from using their computer.",
+    "examples": [
+      "lock my PC",
+      "lock screen",
+      "lock workstation",
+      "secure my computer",
+      "lock my computer when I step away"
+    ]
   },
   {
     "id": "open_url",
-    "description": "Open a website link or URL in the default browser like Chrome or Firefox"
+    "description": "Navigate to a website in the default web browser. Use when the user wants to visit, open, or go to a specific web address or online service by name or URL.",
+    "examples": [
+      "go to YouTube",
+      "open Google",
+      "visit github.com",
+      "open chatgpt.com",
+      "navigate to Reddit",
+      "go to amazon.com"
+    ]
   },
   {
-    "id": "open_folder",
-    "description": "Open a file explorer window to browse files at a specific path or directory"
+    "id": "file_explorer",
+    "description": "Open Windows File Explorer to browse files and folders at a specific location. Use when the user wants to view directory contents, see their files, or navigate to a folder on their computer.",
+    "examples": [
+      "open downloads folder",
+      "show my documents",
+      "browse desktop files",
+      "open the pictures directory",
+      "show me my videos folder"
+    ]
   },
   {
     "id": "get_system_info",
-    "description": "Retrieve system information like Windows version, CPU, RAM, and hardware specs"
+    "description": "Show details about the Windows computer including hardware specs and system information. Use when the user asks about their machine, performance, or hardware components like RAM, CPU, or storage.",
+    "examples": [
+      "what are my PC specs",
+      "show system information",
+      "check RAM and CPU",
+      "tell me about this computer",
+      "how much RAM do I have"
+    ]
   },
   {
     "id": "get_clipboard",
-    "description": "Read or get the current text content stored in the clipboard"
+    "description": "Retrieve and show the current text stored on the Windows clipboard. Use when the user wants to recall, see, or check what text they last copied.",
+    "examples": [
+      "what is on my clipboard",
+      "show clipboard content",
+      "read copied text",
+      "what did I copy",
+      "check my clipboard"
+    ]
   },
   {
     "id": "set_clipboard",
-    "description": "Copy or write text to the clipboard so it can be pasted elsewhere"
+    "description": "Copy new text onto the Windows clipboard so it can be pasted elsewhere. Use when the user wants to save text for later pasting or transfer text between programs.",
+    "examples": [
+      "copy this to clipboard",
+      "save text to clipboard",
+      "copy my notes",
+      "put this on the clipboard",
+      "copy this text"
+    ]
   }
 ]

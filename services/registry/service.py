@@ -29,4 +29,11 @@ class RegistryService:
         return None
 
     def get_descriptions(self) -> list[tuple[str, str]]:
-        return [(t["id"], t["description"]) for t in self._tools]
+        combined: list[tuple[str, str]] = []
+        for t in self._tools:
+            text = t["description"]
+            examples = t.get("examples", [])
+            if examples:
+                text = text + " " + " ".join(examples)
+            combined.append((t["id"], text))
+        return combined

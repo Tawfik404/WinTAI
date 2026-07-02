@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     port: int = 8000
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    tool_similarity_threshold: float = 0.55
+    app_similarity_threshold: float = 0.55
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
