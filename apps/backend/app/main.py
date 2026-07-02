@@ -15,6 +15,9 @@ if str(_repo_root) not in sys.path:
 
 from services.registry.service import RegistryService
 from services.embeddings.service import EmbeddingService
+from services.app_scanner import AppScanner
+from services.app_embeddings import AppEmbeddingService
+from services.executor import ToolExecutor
 
 settings = get_settings()
 
@@ -52,6 +55,22 @@ def startup() -> None:
         "Embedding service initialized with %d tools (dimension=%d).",
         len(descriptions),
         embedder.get_dimension(),
+    )
+
+    scanner = AppScanner(max_workers=4)
+    apps = scanner.scan_all()
+    app_dicts = [{"name": a.name, "path": a.path, "source": a.source} for a in apps]
+
+    app_embedder = AppEmbeddingService()
+    app_embedder.initialize(app_dicts)
+    app.state.app_embedder = app_embedder
+
+    executor = ToolExecutor()
+    app.state.executor = executor
+
+    logger.info(
+        "App scanner + embedder + executor ready (%d apps indexed).",
+        app_embedder.get_index_size(),
     )
 
 

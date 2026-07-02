@@ -34,7 +34,21 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true
-    }
+    },
+    "extraResources": [
+      {
+        "from": "../..",
+        "to": "app",
+        "filter": [
+          "apps/backend/**/*",
+          "services/**/*",
+          "!**/__pycache__/**",
+          "!**/.git/**",
+          "!**/.venv/**",
+          "!**/node_modules/**"
+        ]
+      }
+    ]
   },
   "dependencies": {
     "axios": "^1.7.0",

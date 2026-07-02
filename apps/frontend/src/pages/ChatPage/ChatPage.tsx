@@ -1,6 +1,7 @@
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Chat from '../../components/Chat/Chat'
 import Settings from '../../components/Settings/Settings'
+import BackendStatus from '../../components/BackendStatus/BackendStatus'
 import { useChat } from '../../hooks/useChat'
 import { useSidebar } from '../../hooks/useSidebar'
 import styles from './ChatPage.module.css'
@@ -38,11 +39,14 @@ export default function ChatPage() {
         onDelete={deleteConversation}
         onSettings={openSettings}
       />
-      <Chat
-        conversation={activeConversation}
-        isLoading={isLoading}
-        onSend={send}
-      />
+      <div className={styles.chatCol}>
+        <BackendStatus />
+        <Chat
+          conversation={activeConversation}
+          isLoading={isLoading}
+          onSend={send}
+        />
+      </div>
       <Settings open={showSettings} onClose={closeSettings} />
     </div>
   )

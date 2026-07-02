@@ -2,6 +2,4 @@ from typing import Protocol
 
 
 class ExecutorService(Protocol):
-    """Placeholder interface for future Windows command execution."""
-
-    async def execute(self, command: str, args: list[str]) -> dict: ...
+    def execute(self, tool_name: str, params: dict) -> dict: ...

@@ -46,7 +46,7 @@ class EmbeddingService:
     def get_dimension(self) -> int:
         if self._model is None:
             return 384
-        return self._model.get_sentence_embedding_dimension()
+        return self._model.get_embedding_dimension()
 
     def build_index(
         self, tool_descriptions: list[tuple[str, str]]
