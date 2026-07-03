@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require('electron')
+const { app, BrowserWindow, dialog, session } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 const http = require('http')
@@ -25,9 +25,11 @@ function startBackend() {
   const backendDir = path.join(appRoot, 'apps', 'backend')
   const env = {
     ...process.env,
+    PYTHONPATH: appRoot,
     HTTP_PROXY: '',
     HTTPS_PROXY: '',
-    PYTHONPATH: appRoot,
+    http_proxy: '',
+    https_proxy: '',
   }
 
   backendProcess = spawn('python', ['-m', 'app.main'], {
@@ -128,6 +130,18 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  session.defaultSession.setProxy({ proxyType: 'system' })
+
+  session.defaultSession.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      if (permission === 'media') {
+        callback(true)
+      } else {
+        callback(false)
+      }
+    }
+  )
+
   startBackend()
   pollBackend()
   createWindow()

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { Message, Conversation } from '../types'
 import { sendMessage } from '../services/api'
+import { speak } from '../services/tts'
 
 let messageId = 0
 const nextId = () => `msg_${++messageId}_${Date.now()}`
@@ -77,6 +78,10 @@ export function useChat() {
         if (c.id !== convId) return c
         return { ...c, messages: [...c.messages, assistantMsg] }
       }))
+
+      if (res.tts) {
+        speak(res.tts)
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to connect to backend'
       setError(message)

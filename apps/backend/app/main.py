@@ -18,6 +18,7 @@ from services.embeddings.service import EmbeddingService
 from services.app_scanner import AppScanner
 from services.app_embeddings import AppEmbeddingService
 from services.executor import ToolExecutor
+from services.tts.piper_service import PiperTTS
 
 settings = get_settings()
 
@@ -68,8 +69,17 @@ def startup() -> None:
     executor = ToolExecutor()
     app.state.executor = executor
 
+    piper = PiperTTS()
+    app.state.piper = piper
+    if piper.available:
+        logger.info("Piper TTS available.")
+    else:
+        logger.warning(
+            "Piper TTS not available. Set PIPER_MODEL env var to enable voice."
+        )
+
     logger.info(
-        "App scanner + embedder + executor ready (%d apps indexed).",
+        "App scanner + embedder + executor + TTS ready (%d apps indexed).",
         app_embedder.get_index_size(),
     )
 

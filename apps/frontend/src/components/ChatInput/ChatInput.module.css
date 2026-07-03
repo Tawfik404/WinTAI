@@ -5,6 +5,55 @@
   flex-shrink: 0;
 }
 
+.errorBar {
+  display: flex;
+  align-items: center;
+  max-width: 48rem;
+  margin: 0 auto 8px;
+  padding: 6px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.listeningBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 48rem;
+  margin: 0 auto 8px;
+  padding: 4px 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--accent-text);
+}
+
+.listeningDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.listeningLabel {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .inputContainer {
   display: flex;
   align-items: flex-end;

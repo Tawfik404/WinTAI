@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.core.config import get_settings
 from services.app_resolver import AppResolver
 from services.tools import tool_registry
+from services.tts.response_mapper import build_tts_message
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class ChatResponse(BaseModel):
     status: str
     reason: str | None = None
     execution: dict | None = None
+    tts: str | None = None
 
 
 @router.post("/api/chat")
@@ -120,13 +122,16 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
                 reason=str(e),
             )
 
-        if execution.get("success"):
+        success = execution.get("success", False)
+        tts_msg = build_tts_message(tool_id, success, params)
+        if success:
             msg = execution.get("message", "Executed successfully")
             return ChatResponse(
                 response=msg,
                 tool=tool_info,
                 status="Success",
                 execution=execution,
+                tts=tts_msg,
             )
         else:
             return ChatResponse(
@@ -135,6 +140,7 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
                 status="Failed",
                 reason=execution.get("error"),
                 execution=execution,
+                tts=tts_msg,
             )
 
     return ChatResponse(

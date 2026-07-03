@@ -21,4 +21,5 @@ export interface SendMessageResponse {
   tool?: string
   status?: string
   reason?: string
+  tts?: string
 }

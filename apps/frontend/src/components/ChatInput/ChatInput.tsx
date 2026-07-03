@@ -1,5 +1,8 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
+import VoiceButton from '../VoiceButton/VoiceButton'
+import VoiceLevelIndicator from '../VoiceLevelIndicator/VoiceLevelIndicator'
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'
 import styles from './ChatInput.module.css'
 
 interface ChatInputProps {
@@ -9,6 +12,29 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [voiceTranscript, setVoiceTranscript] = useState('')
+
+  const handleFinalTranscript = useCallback((text: string) => {
+    setVoiceTranscript(text)
+    onSend(text)
+  }, [onSend])
+
+  const {
+    isSupported,
+    isListening,
+    error: speechError,
+    audioLevel,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition(handleFinalTranscript)
+
+  const handleVoiceToggle = useCallback(() => {
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
+    }
+  }, [isListening, startListening, stopListening])
 
   const handleSend = useCallback(() => {
     const textarea = textareaRef.current
@@ -40,6 +66,20 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
 
   return (
     <div className={styles.inputArea}>
+      {speechError && (
+        <div className={styles.errorBar}>
+          <span>{speechError}</span>
+        </div>
+      )}
+      {isListening && !speechError && (
+        <div className={styles.listeningBar}>
+          <span className={styles.listeningDot} />
+          <span className={styles.listeningLabel}>
+            {voiceTranscript || 'Listening...'}
+          </span>
+          <VoiceLevelIndicator level={audioLevel} />
+        </div>
+      )}
       <div className={styles.inputContainer}>
         <textarea
           ref={textareaRef}
@@ -48,12 +88,18 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           rows={1}
           onKeyDown={handleKeyDown}
           onInput={handleInput}
-          disabled={isLoading}
+          disabled={isLoading || isListening}
+        />
+        <VoiceButton
+          isListening={isListening}
+          isSupported={isSupported}
+          isLoading={isLoading}
+          onClick={handleVoiceToggle}
         />
         <button
           className={styles.sendBtn}
           onClick={handleSend}
-          disabled={isLoading}
+          disabled={isLoading || isListening}
           title="Send (Enter)"
         >
           <ArrowUp size={18} />
