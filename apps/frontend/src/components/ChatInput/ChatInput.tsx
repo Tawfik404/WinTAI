@@ -2,7 +2,7 @@ import { useRef, useCallback, useEffect, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
 import VoiceButton from '../VoiceButton/VoiceButton'
 import VoiceLevelIndicator from '../VoiceLevelIndicator/VoiceLevelIndicator'
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'
+import { useSTT } from '../../hooks/useSTT'
 import styles from './ChatInput.module.css'
 
 interface ChatInputProps {
@@ -22,11 +22,12 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const {
     isSupported,
     isListening,
+    interimTranscript,
     error: speechError,
     audioLevel,
     startListening,
     stopListening,
-  } = useSpeechRecognition(handleFinalTranscript)
+  } = useSTT(handleFinalTranscript)
 
   const handleVoiceToggle = useCallback(() => {
     if (isListening) {
@@ -64,6 +65,8 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
     textareaRef.current?.focus()
   }, [])
 
+  const displayText = voiceTranscript || interimTranscript
+
   return (
     <div className={styles.inputArea}>
       {speechError && (
@@ -75,7 +78,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
         <div className={styles.listeningBar}>
           <span className={styles.listeningDot} />
           <span className={styles.listeningLabel}>
-            {voiceTranscript || 'Listening...'}
+            {displayText || 'Listening...'}
           </span>
           <VoiceLevelIndicator level={audioLevel} />
         </div>

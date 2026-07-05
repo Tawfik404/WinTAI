@@ -38,7 +38,25 @@ function startBackend() {
     env,
   })
 
-  backendProcess.stdout.on('data', (d) => process.stdout.write(`[backend] ${d}`))
+  backendProcess.stdout.on('data', (d) => {
+    const text = d.toString()
+    process.stdout.write(`[backend] ${text}`)
+
+    const lines = text.split('\n')
+    for (const line of lines) {
+      if (line.startsWith('[PROGRESS]')) {
+        const parts = line.replace('[PROGRESS] ', '').split('|')
+        if (parts.length >= 3) {
+          sendStatus({
+            state: 'loading',
+            message: parts[2],
+            progress: parseFloat(parts[0]) || 0,
+          })
+        }
+      }
+    }
+  })
+
   backendProcess.stderr.on('data', (d) => process.stderr.write(`[backend] ${d}`))
 
   backendProcess.on('error', (err) => {
@@ -69,19 +87,29 @@ function pollBackend() {
       res.on('data', (c) => (body += c))
       res.on('end', () => {
         if (res.statusCode === 200) {
-          sendStatus({ state: 'ready' })
-          clearInterval(healthInterval)
-          healthInterval = null
+          try {
+            const data = JSON.parse(body)
+            if (data.status === 'ready') {
+              sendStatus({ state: 'ready' })
+              clearInterval(healthInterval)
+              healthInterval = null
+            } else {
+              sendStatus({
+                state: 'loading',
+                message: data.message || 'Starting backend...',
+                progress: data.progress || 0,
+              })
+            }
+          } catch {
+            sendStatus({ state: 'ready' })
+            clearInterval(healthInterval)
+            healthInterval = null
+          }
         }
       })
     })
     req.on('error', () => {
-      if (attempt <= 120) {
-        sendStatus({
-          state: 'starting',
-          message: `Starting backend${'.'.repeat((attempt % 3) + 1)}`,
-        })
-      } else {
+      if (attempt > 120) {
         sendStatus({ state: 'error', message: 'Backend did not start in time' })
         clearInterval(healthInterval)
         healthInterval = null
@@ -111,6 +139,7 @@ function createWindow() {
     center: true,
     backgroundColor: '#0f0f13',
     show: false,
+    icon: path.join(__dirname, 'icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -129,8 +158,25 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
-app.whenReady().then(() => {
-  session.defaultSession.setProxy({ proxyType: 'system' })
+async function reloadSystemProxy() {
+  try {
+    await session.defaultSession.setProxy({ mode: 'system' })
+    await session.defaultSession.closeAllConnections()
+    console.log('Operating system proxy configuration reloaded.')
+  } catch (err) {
+    console.error('Failed to apply operating system proxy configuration:', err.message)
+  }
+}
+
+app.whenReady().then(async () => {
+  try {
+    console.log('Using operating system proxy configuration.')
+    await session.defaultSession.setProxy({ mode: 'system' })
+    await session.defaultSession.closeAllConnections()
+    console.log('Operating system proxy configuration applied.')
+  } catch (err) {
+    console.error('Failed to apply operating system proxy configuration:', err.message)
+  }
 
   session.defaultSession.setPermissionRequestHandler(
     (webContents, permission, callback) => {
@@ -142,9 +188,9 @@ app.whenReady().then(() => {
     }
   )
 
+  createWindow()
   startBackend()
   pollBackend()
-  createWindow()
 })
 
 app.on('window-all-closed', () => {

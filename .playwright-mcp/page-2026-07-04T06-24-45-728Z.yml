@@ -1,0 +1,7 @@
+- generic [active] [ref=f4e1]:
+  - 'heading "Error: Forbidden" [level=1] [ref=f4e2]'
+  - heading "Your client does not have permission to get URL /model/tiny-en/quantized/tiny-en/tokenizer.bin from this server." [level=2] [ref=f4e3]:
+    - text: Your client does not have permission to get URL
+    - code [ref=f4e4]: /model/tiny-en/quantized/tiny-en/tokenizer.bin
+    - text: from this server.
+  - heading [level=2]

@@ -1,11 +1,17 @@
 .bar {
   display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.content {
+  display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   font-size: 12px;
   color: #fff;
-  flex-shrink: 0;
 }
 
 .dot {
@@ -14,12 +20,26 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.85);
   animation: pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 .text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+}
+
+.progressTrack {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  transition: width 0.3s ease;
 }
 
 @keyframes pulse {

@@ -6,3 +6,4 @@ python-dotenv>=1.0.0
 httpx>=0.28.0
 sentence-transformers>=3.0.0
 pywin32>=308
+sounddevice>=0.5.0

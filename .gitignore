@@ -15,7 +15,8 @@ dist-electron/
 apps/frontend/dist/
 apps/frontend/release/
 
-# TTS voice models
+# Voice models (STT + TTS)
+models/stt/
 models/tts/*.onnx
 models/tts/*.onnx.json
 

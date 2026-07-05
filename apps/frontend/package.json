@@ -24,11 +24,12 @@
       "electron/**/*",
       "package.json"
     ],
+    "icon": "build/wintai.png",
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": null
+      "icon": "build/wintai.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -41,6 +42,7 @@
         "to": "app",
         "filter": [
           "apps/backend/**/*",
+          "models/stt/**/*",
           "services/**/*",
           "!**/__pycache__/**",
           "!**/.git/**",

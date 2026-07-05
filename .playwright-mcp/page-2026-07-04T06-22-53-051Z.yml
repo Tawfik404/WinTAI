@@ -1,0 +1,7 @@
+- generic [active] [ref=e1]:
+  - 'heading "Error: Forbidden" [level=1] [ref=e2]'
+  - heading "Your client does not have permission to get URL /model/medium-streaming-en/quantized/adapter.ort from this server." [level=2] [ref=e3]:
+    - text: Your client does not have permission to get URL
+    - code [ref=e4]: /model/medium-streaming-en/quantized/adapter.ort
+    - text: from this server.
+  - heading [level=2]

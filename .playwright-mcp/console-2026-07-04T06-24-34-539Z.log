@@ -1,0 +1,2 @@
+[   11035ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://download.moonshine.ai/model/tiny-en/quantized/tiny-en/tokenizer.bin:0
+[   11470ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://download.moonshine.ai/favicon.ico:0

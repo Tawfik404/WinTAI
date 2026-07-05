@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import styles from './Settings.module.css'
+import MicrophoneSelector from './MicrophoneSelector'
 
 interface SettingsProps {
   open: boolean
@@ -23,6 +24,13 @@ export default function Settings({ open, onClose }: SettingsProps) {
           <div className={styles.sectionTitle}>Connection</div>
           <div className={styles.sectionContent}>
             Backend URL: <code>http://127.0.0.1:8000</code>
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>Voice</div>
+          <div className={styles.sectionContent}>
+            <MicrophoneSelector />
           </div>
         </div>
 

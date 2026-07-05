@@ -1,22 +1,25 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import speechRecognition from '../services/speechRecognition'
+import sttService from '../services/stt'
+import { getSelectedMicrophone } from '../services/microphone'
 
-interface SpeechRecognitionHook {
+interface STTHook {
   isSupported: boolean
   isListening: boolean
+  status: string
   transcript: string
   interimTranscript: string
   error: string | null
   audioLevel: number
-  startListening: () => void
+  startListening: (deviceId?: string) => Promise<void>
   stopListening: () => void
   cancelListening: () => void
 }
 
-export function useSpeechRecognition(
+export function useSTT(
   onFinalTranscript?: (text: string) => void,
-): SpeechRecognitionHook {
+): STTHook {
   const [isListening, setIsListening] = useState(false)
+  const [status, setStatus] = useState('idle')
   const [transcript, setTranscript] = useState('')
   const [interimTranscript, setInterimTranscript] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -29,8 +32,8 @@ export function useSpeechRecognition(
 
   useEffect(() => {
     return () => {
-      if (speechRecognition.isListening) {
-        speechRecognition.cancel()
+      if (sttService.isListening) {
+        sttService.cancel()
       }
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
@@ -42,16 +45,28 @@ export function useSpeechRecognition(
     errorTimerRef.current = setTimeout(() => setError(null), 5000)
   }, [])
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async (deviceId?: string) => {
     setError(null)
     setTranscript('')
     setInterimTranscript('')
     setAudioLevel(0)
+    setStatus('connecting')
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
 
-    if (!speechRecognition.isSupported) {
+    if (!sttService.isSupported) {
       setError('Speech recognition is not supported in this browser')
+      setStatus('error')
       return
+    }
+
+    let resolvedDeviceId = deviceId
+    if (!resolvedDeviceId) {
+      try {
+        const saved = await getSelectedMicrophone()
+        resolvedDeviceId = saved.id
+      } catch {
+        resolvedDeviceId = 'default'
+      }
     }
 
     const fadeLevel = () => {
@@ -60,30 +75,34 @@ export function useSpeechRecognition(
     }
     rafRef.current = requestAnimationFrame(fadeLevel)
 
-    speechRecognition.start({
-      onResult: (text, isFinal) => {
-        if (isFinal) {
-          setTranscript(text)
-          setInterimTranscript('')
-          onFinalRef.current?.(text)
-        } else {
-          setInterimTranscript(text)
-        }
+    sttService.start({
+      onPartial: (text: string) => {
+        setInterimTranscript(text)
       },
-      onEnd: () => {
+      onFinal: (text: string) => {
+        setTranscript(text)
+        setInterimTranscript('')
+      },
+      onDone: (text: string) => {
         setIsListening(false)
+        setStatus('idle')
         setAudioLevel(0)
         if (rafRef.current) cancelAnimationFrame(rafRef.current)
+        if (text) {
+          setTranscript(text)
+          onFinalRef.current?.(text)
+        }
       },
-      onError: (msg) => {
+      onError: (msg: string) => {
         setIsListening(false)
+        setStatus('error')
         setAudioLevel(0)
         setError(msg)
         setInterimTranscript('')
         if (rafRef.current) cancelAnimationFrame(rafRef.current)
         clearErrorAfterDelay()
       },
-      onAudioLevel: (level) => {
+      onAudioLevel: (level: number) => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current)
         setAudioLevel(level)
         const fadeLevel = () => {
@@ -92,29 +111,32 @@ export function useSpeechRecognition(
         }
         rafRef.current = requestAnimationFrame(fadeLevel)
       },
-    })
+    }, resolvedDeviceId)
 
     setIsListening(true)
   }, [clearErrorAfterDelay])
 
   const stopListening = useCallback(() => {
-    speechRecognition.stop()
+    sttService.stop()
     setIsListening(false)
+    setStatus('processing')
     setAudioLevel(0)
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
   }, [])
 
   const cancelListening = useCallback(() => {
-    speechRecognition.cancel()
+    sttService.cancel()
     setIsListening(false)
+    setStatus('idle')
     setInterimTranscript('')
     setAudioLevel(0)
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
   }, [])
 
   return {
-    isSupported: speechRecognition.isSupported,
+    isSupported: sttService.isSupported,
     isListening,
+    status,
     transcript,
     interimTranscript,
     error,

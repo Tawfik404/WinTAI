@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import styles from './BackendStatus.module.css'
 
 interface StatusData {
-  state: 'starting' | 'ready' | 'error'
+  state: 'starting' | 'loading' | 'ready' | 'error'
   message?: string
+  progress?: number
 }
 
 declare global {
@@ -27,12 +28,24 @@ export default function BackendStatus() {
 
   if (!status || status.state === 'ready') return null
 
-  const color = status.state === 'starting' ? '#f59e0b' : '#ef4444'
+  const isError = status.state === 'error'
+  const color = isError ? '#ef4444' : '#2563eb'
+  const progressPct = status.progress != null ? Math.round(status.progress * 100) : 0
 
   return (
     <div className={styles.bar} style={{ backgroundColor: color }}>
-      <span className={styles.dot} />
-      <span className={styles.text}>{status.message || status.state}</span>
+      <div className={styles.content}>
+        <span className={styles.dot} />
+        <span className={styles.text}>{status.message || status.state}</span>
+      </div>
+      {!isError && progressPct > 0 && (
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${Math.min(progressPct, 100)}%` }}
+          />
+        </div>
+      )}
     </div>
   )
 }
