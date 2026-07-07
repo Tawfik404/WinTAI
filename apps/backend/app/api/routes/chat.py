@@ -1,7 +1,7 @@
 import re
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.config import get_settings
@@ -38,8 +38,10 @@ class ChatResponse(BaseModel):
 @router.post("/api/chat")
 async def chat(body: ChatRequest, request: Request) -> ChatResponse:
     settings = get_settings()
-    embedder = request.app.state.embedder
-    registry = request.app.state.registry
+    embedder = getattr(request.app.state, "embedder", None)
+    registry = getattr(request.app.state, "registry", None)
+    if embedder is None or registry is None:
+        raise HTTPException(status_code=503, detail="Backend is still initializing. Please try again shortly.")
     app_embedder = getattr(request.app.state, "app_embedder", None)
     executor = getattr(request.app.state, "executor", None)
 
@@ -215,3 +217,5 @@ def _resolve_params(
         return {"path": ""}
 
     return {}
+
+

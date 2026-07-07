@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 .label {
@@ -15,8 +16,16 @@
   gap: 6px;
 }
 
-.select {
+.customSelect {
   flex: 1;
+  position: relative;
+}
+
+.selectBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 8px;
   font-size: 13px;
   border: 1px solid var(--border);
@@ -24,16 +33,107 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   cursor: pointer;
+  text-align: left;
+}
+
+.selectBtn:focus {
+  border-color: var(--accent);
   outline: none;
 }
 
-.select:focus {
-  border-color: var(--accent);
-}
-
-.select:disabled {
+.selectBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.selectBtnText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectBtnArrow {
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.optionsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  margin-top: 2px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.option:hover {
+  background: var(--bg-hover);
+}
+
+.optionActive {
+  background: var(--bg-hover);
+  font-weight: 500;
+}
+
+.optionName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optionBadge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.levelBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.levelBar {
+  width: 3px;
+  background: var(--border);
+  border-radius: 1px;
+  transition: background 0.3s;
+}
+
+.levelBar:nth-child(1) { height: 4px; }
+.levelBar:nth-child(2) { height: 7px; }
+.levelBar:nth-child(3) { height: 10px; }
+.levelBar:nth-child(4) { height: 12px; }
+.levelBar:nth-child(5) { height: 14px; }
+
+.levelBarOn {
+  background: #22c55e;
 }
 
 .refreshBtn {
@@ -87,11 +187,6 @@
 
 .statusOnline {
   color: #22c55e;
-  font-weight: 500;
-}
-
-.statusOffline {
-  color: #ef4444;
   font-weight: 500;
 }
 

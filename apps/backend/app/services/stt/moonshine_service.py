@@ -45,73 +45,94 @@ class MoonshineSTT:
         settings = get_settings()
         language = settings.stt_language
         model_arch = settings.stt_model_arch
-        requested_arch = ModelArch(model_arch) if model_arch is not None else None
+        requested_arch = ModelArch(model_arch) if model_arch is not None else ModelArch.MEDIUM_STREAMING
+
 
         try:
             STT_MODEL_DIR.mkdir(parents=True, exist_ok=True)
             model_path, model_arch_val = self._resolve_model_path(
                 language, requested_arch
             )
-            self._transcriber = Transcriber(
-                model_path=model_path,
-                model_arch=model_arch_val,
-            )
+            
+            # Try to load the model. If it's corrupted, Transcriber initialization will fail.
+            try:
+                self._transcriber = Transcriber(
+                    model_path=model_path,
+                    model_arch=model_arch_val,
+                )
+            except Exception as load_exc:
+                logger.warning(
+                    "Failed to load Moonshine model from %s, attempting to re-download. Error: %s",
+                    model_path,
+                    load_exc
+                )
+                # Delete corrupted folder and try downloading again
+                import shutil
+                try:
+                    shutil.rmtree(model_path, ignore_errors=True)
+                except Exception:
+                    pass
+                
+                # Re-resolve (this will trigger get_model_for_language download since the files are gone)
+                model_path, model_arch_val = self._resolve_model_path_force_download(
+                    language, model_arch_val
+                )
+                self._transcriber = Transcriber(
+                    model_path=model_path,
+                    model_arch=model_arch_val,
+                )
+                
             self._model_path = str(model_path)
             self._model_arch = int(model_arch_val)
             self._loaded = True
             logger.info("Model loaded: %s (arch=%s)", self._model_path, self._model_arch)
-        except Exception:
+        except Exception as exc:
             logger.exception("Failed to load Moonshine model")
             raise RuntimeError(
-                f"Moonshine STT model could not be loaded "
-                f"(language={language}, arch={model_arch})"
+                f"Moonshine STT model could not be loaded: {exc}"
             )
 
     def _resolve_model_path(
         self,
         language: str,
-        requested_arch: ModelArch | None,
+        requested_arch: ModelArch,
     ) -> tuple[str, ModelArch]:
-        """Try the requested model first, fall back to tiny-en.
+        """Try the requested model first, download if not cached, fallback to tiny-en."""
+        # Check if requested arch is already cached and valid
+        if self._model_cached(requested_arch):
+            model_dir = self._model_dir(requested_arch)
+            logger.info("Using cached Moonshine model: %s (arch=%s)", model_dir, requested_arch)
+            return str(model_dir), requested_arch
 
-        ``tiny-en`` is bundled with the pip package so it is always
-        available without a network call.
+        # If not cached, download it automatically
+        return self._resolve_model_path_force_download(language, requested_arch)
 
-        Streaming models are only attempted when their files are already
-        on disk, because the Moonshine CDN (download.moonshine.ai) is
-        unreachable in many environments and times out on every request.
-
-        When the model is already cached on disk the path is returned
-        directly, bypassing ``get_model_for_language`` entirely (which
-        would otherwise attempt to download a spelling model from the
-        CDN and add a multi-second delay).
-        """
-        candidates = [requested_arch] if requested_arch is not None else []
-        candidates += [
-            ModelArch.MEDIUM_STREAMING,
-            ModelArch.SMALL_STREAMING,
-            ModelArch.TINY_STREAMING,
-            ModelArch.TINY,
-        ]
-
-        for arch in candidates:
-            if self._model_cached(arch):
-                model_dir = self._model_dir(arch)
-                logger.info("Using cached Moonshine model: %s (arch=%s)", model_dir, arch)
-                return str(model_dir), arch
-
-        # Fall back to tiny-en via get_model_for_language (which may try
-        # a CDN fetch for the spelling model — harmless, just slow).
+    def _resolve_model_path_force_download(
+        self,
+        language: str,
+        target_arch: ModelArch,
+    ) -> tuple[str, ModelArch]:
+        """Download the model using get_model_for_language API."""
+        logger.info("Downloading and caching Moonshine model: arch=%s", target_arch)
         try:
             return get_model_for_language(
                 wanted_language=language,
-                wanted_model_arch=ModelArch.TINY,
+                wanted_model_arch=target_arch,
                 cache_root=STT_MODEL_DIR,
             )
         except Exception as exc:
-            raise RuntimeError(
-                f"No Moonshine model available (even tiny-en failed): {exc}"
-            ) from exc
+            logger.exception("Failed to download target arch %s, trying TINY fallback", target_arch)
+            if target_arch != ModelArch.TINY:
+                try:
+                    return get_model_for_language(
+                        wanted_language=language,
+                        wanted_model_arch=ModelArch.TINY,
+                        cache_root=STT_MODEL_DIR,
+                    )
+                except Exception as inner_exc:
+                    raise RuntimeError(f"Failed to download fallback TINY model: {inner_exc}") from inner_exc
+            raise RuntimeError(f"Failed to download Moonshine model: {exc}") from exc
+
 
     @staticmethod
     def _model_name(arch: ModelArch) -> str:

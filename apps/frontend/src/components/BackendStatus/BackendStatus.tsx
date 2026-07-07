@@ -7,22 +7,13 @@ interface StatusData {
   progress?: number
 }
 
-declare global {
-  interface Window {
-    electronAPI?: {
-      platform: string
-      onBackendStatus: (callback: (status: StatusData) => void) => void
-    }
-  }
-}
-
 export default function BackendStatus() {
   const [status, setStatus] = useState<StatusData | null>(
     window.electronAPI ? { state: 'starting', message: 'Starting backend...' } : null
   )
 
   useEffect(() => {
-    if (!window.electronAPI) return
+    if (!window.electronAPI?.onBackendStatus) return
     window.electronAPI.onBackendStatus(setStatus)
   }, [])
 

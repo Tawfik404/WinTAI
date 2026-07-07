@@ -43,6 +43,12 @@ class VectorIndex:
     def clear(self) -> None:
         self._entries.clear()
 
+    def to_records(self) -> list[tuple[str, list[float]]]:
+        return [(tool_id, vector.tolist()) for tool_id, vector in self._entries]
+
+    def load_records(self, records: list[tuple[str, list[float]]]) -> None:
+        self.build(records)
+
     @property
     def size(self) -> int:
         return len(self._entries)

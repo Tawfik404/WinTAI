@@ -47,3 +47,39 @@ export async function getSelectedMicrophone(): Promise<MicrophoneDevice> {
 export async function selectMicrophone(deviceId: string): Promise<void> {
   await http.put('/api/stt/microphone', { deviceId })
 }
+
+export async function measureMicLevel(deviceId: string): Promise<number> {
+  try {
+    const constraints: MediaStreamConstraints = {
+      audio: deviceId === 'default' ? true : { deviceId: { exact: deviceId } },
+    }
+    const stream = await navigator.mediaDevices.getUserMedia(constraints)
+    const audioContext = new AudioContext()
+    await audioContext.resume()
+    const source = audioContext.createMediaStreamSource(stream)
+    const analyser = audioContext.createAnalyser()
+    analyser.fftSize = 256
+    source.connect(analyser)
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount)
+    let peak = 0
+
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, 50))
+      analyser.getByteTimeDomainData(dataArray)
+      let sum = 0
+      for (let j = 0; j < dataArray.length; j++) {
+        const val = dataArray[j] / 128 - 1
+        sum += val * val
+      }
+      peak = Math.max(peak, Math.sqrt(sum / dataArray.length))
+    }
+
+    source.disconnect()
+    await audioContext.close()
+    stream.getTracks().forEach(t => t.stop())
+    return peak
+  } catch {
+    return 0
+  }
+}

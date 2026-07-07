@@ -1,0 +1,21 @@
+<!doctype html><html><body><button id="start">start</button><script>
+(async () => {
+  console.log('location', location.href)
+  console.log('SpeechRecognition', typeof window.SpeechRecognition)
+  console.log('webkitSpeechRecognition', typeof window.webkitSpeechRecognition)
+  console.log('onLine', navigator.onLine)
+  try { const r = await fetch('https://www.google.com/generate_204', { cache: 'no-store' }); console.log('fetch-google', r.status, r.type) } catch (e) { console.log('fetch-google-error', e.name, e.message) }
+  const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!Ctor) return
+  const rec = new Ctor()
+  rec.lang = 'en-US'; rec.continuous = false; rec.interimResults = false
+  rec.onstart = () => console.log('speech-start')
+  rec.onaudiostart = () => console.log('audio-start')
+  rec.onsoundstart = () => console.log('sound-start')
+  rec.onspeechstart = () => console.log('speech-detected')
+  rec.onerror = (e) => console.log('speech-error', e.error, e.message || '')
+  rec.onend = () => console.log('speech-end')
+  rec.onresult = (e) => console.log('speech-result', e.results[0][0].transcript)
+  setTimeout(() => { try { rec.start(); console.log('speech-start-called') } catch (e) { console.log('speech-start-throw', e.name, e.message) } }, 1000)
+})()
+</script></body></html>

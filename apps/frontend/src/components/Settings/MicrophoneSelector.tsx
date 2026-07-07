@@ -1,34 +1,87 @@
+import { useState, useRef, useEffect } from 'react'
 import { useMicrophones } from '../../hooks/useMicrophones'
 import styles from './MicrophoneSelector.module.css'
 
-export default function MicrophoneSelector() {
-  const { microphones, selected, loading, error, select, refresh } = useMicrophones()
+const BAR_COUNT = 5
+
+function LevelBars({ level }: { level: number }) {
+  const filled = Math.round(level * BAR_COUNT)
 
   return (
-    <div className={styles.container}>
+    <span className={styles.levelBars}>
+      {Array.from({ length: BAR_COUNT }, (_, i) => (
+        <span
+          key={i}
+          className={`${styles.levelBar} ${i < filled ? styles.levelBarOn : ''}`}
+        />
+      ))}
+    </span>
+  )
+}
+
+export default function MicrophoneSelector() {
+  const { microphones, selected, loading, error, select, refresh, micLevels } = useMicrophones()
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handle = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [open])
+
+  return (
+    <div className={styles.container} ref={rootRef}>
       <label className={styles.label}>Input Device</label>
 
       <div className={styles.controlRow}>
-        <select
-          className={styles.select}
-          value={selected?.id ?? ''}
-          disabled={loading || microphones.length === 0}
-          onChange={e => select(e.target.value)}
-        >
-          {loading && <option value="">Loading...</option>}
-          {!loading &&
-            microphones.map(mic => (
-              <option key={mic.id} value={mic.id}>
-                {mic.name}{mic.default ? ' (Default)' : ''}
-              </option>
-            ))}
-        </select>
+        <div className={styles.customSelect}>
+          <button
+            className={styles.selectBtn}
+            onClick={() => !loading && setOpen(!open)}
+            disabled={loading || microphones.length === 0}
+            type="button"
+          >
+            <span className={styles.selectBtnText}>
+              {loading ? 'Loading...' : selected?.name || 'Select microphone'}
+            </span>
+            <span className={styles.selectBtnArrow}>{open ? '▲' : '▼'}</span>
+          </button>
+
+          {open && (
+            <div className={styles.optionsList}>
+              {microphones.map(mic => {
+                const level = micLevels[mic.id] ?? 0
+                return (
+                  <button
+                    key={mic.id}
+                    className={`${styles.option} ${selected?.id === mic.id ? styles.optionActive : ''}`}
+                    onClick={() => { select(mic.id); setOpen(false) }}
+                    type="button"
+                  >
+                    <LevelBars level={level} />
+                    <span className={styles.optionName}>
+                      {mic.name}
+                      {mic.default ? <span className={styles.optionBadge}>Default</span> : ''}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
         <button
           className={styles.refreshBtn}
           onClick={refresh}
           disabled={loading}
           title="Refresh devices"
+          type="button"
         >
           ↻
         </button>
@@ -44,20 +97,10 @@ export default function MicrophoneSelector() {
             <span className={styles.infoLabel}>Status:</span>
             <span className={styles.statusOnline}>Connected</span>
           </div>
-          {selected.id !== 'default' && (
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>ID:</span>
-              <span className={styles.infoValue} title={selected.id}>
-                {selected.id.length > 24
-                  ? selected.id.slice(0, 24) + '...'
-                  : selected.id}
-              </span>
-            </div>
-          )}
         </div>
       )}
 
-      {loading && <div className={styles.hint}>Scanning for microphones...</div>}
+      {loading && <div className={styles.hint}>Scanning microphones...</div>}
 
       {microphones.length === 0 && !loading && (
         <div className={styles.hint}>No microphones found. Check your microphone connection.</div>

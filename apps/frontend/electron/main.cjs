@@ -1,11 +1,28 @@
 const { app, BrowserWindow, dialog, session } = require('electron')
 const path = require('path')
+const fs = require('fs')
 const { spawn } = require('child_process')
 const http = require('http')
+
+if (!process.env.GOOGLE_API_KEY && process.env.WINTAI_GOOGLE_API_KEY) {
+  process.env.GOOGLE_API_KEY = process.env.WINTAI_GOOGLE_API_KEY
+}
 
 let mainWindow
 let backendProcess = null
 let healthInterval = null
+let frontendServer = null
+
+const MIME = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.json': 'application/json',
+}
 
 function getAppRoot() {
   if (process.env.VITE_DEV_SERVER_URL) {
@@ -20,16 +37,16 @@ function sendStatus(status) {
   }
 }
 
+// ------------------------------------------------------------------
+// Backend
+// ------------------------------------------------------------------
+
 function startBackend() {
   const appRoot = getAppRoot()
   const backendDir = path.join(appRoot, 'apps', 'backend')
   const env = {
     ...process.env,
     PYTHONPATH: appRoot,
-    HTTP_PROXY: '',
-    HTTPS_PROXY: '',
-    http_proxy: '',
-    https_proxy: '',
   }
 
   backendProcess = spawn('python', ['-m', 'app.main'], {
@@ -129,7 +146,60 @@ function stopBackend() {
   }
 }
 
-function createWindow() {
+// ------------------------------------------------------------------
+// Frontend HTTP server (production)
+// SpeechRecognition requires an HTTP(S) origin — file:// won't work.
+// ------------------------------------------------------------------
+
+function createFrontendServer() {
+  return new Promise((resolve, reject) => {
+    const distDir = path.join(__dirname, '../dist')
+
+    const server = http.createServer((req, res) => {
+      // Serve static files
+      let filePath = path.join(distDir, req.url === '/' ? 'index.html' : req.url.split('?')[0])
+
+      // SPA fallback — serve index.html for any unrecognised path
+      if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+        filePath = path.join(distDir, 'index.html')
+      }
+
+      const ext = path.extname(filePath)
+      const contentType = MIME[ext] || 'application/octet-stream'
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(404)
+          res.end('Not found')
+          return
+        }
+        res.writeHead(200, { 'Content-Type': contentType })
+        res.end(data)
+      })
+    })
+
+    server.listen(0, '127.0.0.1', () => {
+      const port = server.address().port
+      console.log(`[frontend] Serving dist on http://127.0.0.1:${port}`)
+      frontendServer = server
+      resolve(port)
+    })
+    server.on('error', reject)
+  })
+}
+
+function stopFrontendServer() {
+  if (frontendServer) {
+    frontendServer.close()
+    frontendServer = null
+  }
+}
+
+// ------------------------------------------------------------------
+// Window
+// ------------------------------------------------------------------
+
+async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -151,33 +221,19 @@ function createWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    const port = await createFrontendServer()
+    mainWindow.loadURL(`http://127.0.0.1:${port}`)
   }
 
   mainWindow.once('ready-to-show', () => mainWindow.show())
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
-async function reloadSystemProxy() {
-  try {
-    await session.defaultSession.setProxy({ mode: 'system' })
-    await session.defaultSession.closeAllConnections()
-    console.log('Operating system proxy configuration reloaded.')
-  } catch (err) {
-    console.error('Failed to apply operating system proxy configuration:', err.message)
-  }
-}
+// ------------------------------------------------------------------
+// App lifecycle
+// ------------------------------------------------------------------
 
 app.whenReady().then(async () => {
-  try {
-    console.log('Using operating system proxy configuration.')
-    await session.defaultSession.setProxy({ mode: 'system' })
-    await session.defaultSession.closeAllConnections()
-    console.log('Operating system proxy configuration applied.')
-  } catch (err) {
-    console.error('Failed to apply operating system proxy configuration:', err.message)
-  }
-
   session.defaultSession.setPermissionRequestHandler(
     (webContents, permission, callback) => {
       if (permission === 'media') {
@@ -188,8 +244,9 @@ app.whenReady().then(async () => {
     }
   )
 
-  createWindow()
+  await createWindow()
   startBackend()
+
   pollBackend()
 })
 
@@ -201,4 +258,8 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-app.on('will-quit', () => stopBackend())
+app.on('will-quit', () => {
+  stopBackend()
+  stopFrontendServer()
+})
+

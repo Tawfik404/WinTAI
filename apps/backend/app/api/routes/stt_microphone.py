@@ -32,12 +32,7 @@ async def list_microphones(request: Request):
 async def get_microphone(request: Request):
     manager = _get_manager(request)
     device_id = manager.get_device_id()
-
-    for d in manager.enumerate():
-        if d["id"] == device_id:
-            return JSONResponse(content=d)
-
-    return JSONResponse(content={"id": "default", "name": "System Default", "default": True})
+    return JSONResponse(content={"id": device_id})
 
 
 @router.put("/microphone")

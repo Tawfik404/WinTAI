@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     debug: bool = True
     host: str = "127.0.0.1"
     port: int = 8000
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: list[str] = ["*"]
 
     tool_similarity_threshold: float = 0.55
     app_similarity_threshold: float = 0.55

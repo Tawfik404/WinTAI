@@ -41,6 +41,11 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+.listeningDot.active {
+  background: #22c55e;
+  animation: pulse 0.6s ease-in-out infinite;
+}
+
 .listeningLabel {
   flex: 0 1 auto;
   overflow: hidden;
