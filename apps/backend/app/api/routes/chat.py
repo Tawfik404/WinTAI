@@ -155,6 +155,56 @@ async def chat(body: ChatRequest, request: Request) -> ChatResponse:
 def _resolve_params(
     tool_id: str, message: str, app_embedder, settings=None
 ) -> dict | None:
+    if tool_id in ("close_app", "focus_app", "restart_app", "force_close_app",
+                    "minimize_app", "maximize_app", "get_app_details",
+                    "open_app_folder"):
+        if not app_embedder or app_embedder.get_index_size() == 0:
+            return None
+
+        result = app_embedder.search(message)
+        app_name = result.get("name", "")
+        confidence = result.get("confidence", 0)
+        threshold = settings.app_similarity_threshold if settings else 0.55
+        raw_path = result.get("path", "")
+
+        logger.info("[APP MATCH] %s (%.2f) for tool=%s", app_name, confidence, tool_id)
+
+        if confidence < threshold and not app_name:
+            logger.info("[DECISION] REJECTED: no app match for %s", tool_id)
+            return None
+
+        if tool_id == "open_app_folder":
+            resolved_path = _resolver.resolve(raw_path, app_name)
+            if not resolved_path:
+                logger.info("[DECISION] REJECTED: no valid path for open_app_folder")
+                return None
+            return {"app_path": resolved_path}
+
+        return {"app_name": app_name or result.get("name", "")}
+
+    if tool_id == "snap_window":
+        if not app_embedder or app_embedder.get_index_size() == 0:
+            return None
+
+        result = app_embedder.search(message)
+        app_name = result.get("name", "")
+        confidence = result.get("confidence", 0)
+        threshold = settings.app_similarity_threshold if settings else 0.55
+
+        logger.info("[APP MATCH] %s (%.2f) for snap_window", app_name, confidence)
+
+        if confidence < threshold and not app_name:
+            return None
+
+        position = "left"
+        msg_lower = message.lower()
+        for pos in ("right", "left", "top", "bottom"):
+            if pos in msg_lower:
+                position = pos
+                break
+
+        return {"app_name": app_name or result.get("name", ""), "position": position}
+
     if tool_id == "open_app":
         if not app_embedder or app_embedder.get_index_size() == 0:
             return None
@@ -195,10 +245,6 @@ def _resolve_params(
                     w = "https://" + w
                 return {"url": w}
         return None
-
-    if tool_id == "shutdown_pc":
-        force = "force" in message.lower() or "now" in message.lower() or "immediately" in message.lower()
-        return {"force": force}
 
     if tool_id == "file_explorer":
         words = message.lower().split()

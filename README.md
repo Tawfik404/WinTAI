@@ -35,7 +35,7 @@ WinTAI/
 | `apps/frontend` | Pure UI — no business logic, no system access |
 | `apps/backend` | API orchestrator — no business logic, routes to services |
 | `packages/shared` | Contracts only — TypeScript types, no runtime |
-| `packages/tools` | Static tool definitions only — open_app, open_url, shutdown |
+| `packages/tools` | Static tool definitions only — open_app, open_url |
 | `services/embeddings` | Placeholder interface for future intent detection |
 | `services/executor` | Placeholder interface for future Windows command execution |
 | `services/registry` | Placeholder interface for future tool/action registry |

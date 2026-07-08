@@ -16,17 +16,6 @@
     ]
   },
   {
-    "id": "shutdown_pc",
-    "description": "Power off the Windows computer completely. Use when the user wants to turn off, switch off, or shut down their machine for the day or to save power.",
-    "examples": [
-      "shut down my PC",
-      "turn off computer",
-      "power off laptop",
-      "shut down Windows",
-      "switch off my machine"
-    ]
-  },
-  {
     "id": "restart_pc",
     "description": "Reboot the Windows computer so it starts fresh. Use when the user wants to refresh the system, apply updates, or restart after installing new software.",
     "examples": [
