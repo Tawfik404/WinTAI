@@ -1,3 +1,4 @@
+import ToolResponseCard from '../ToolResponseCard/ToolResponseCard'
 import type { Message as MessageType } from '../../types'
 import styles from './Message.module.css'
 
@@ -7,6 +8,16 @@ interface MessageProps {
 
 export default function Message({ message }: MessageProps) {
   const isUser = message.role === 'user'
+
+  if (!isUser && message.toolData) {
+    return (
+      <div className={`${styles.row} ${styles.assistantRow}`}>
+        <div className={styles.toolCardWrap}>
+          <ToolResponseCard toolData={message.toolData} timestamp={message.timestamp} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`${styles.row} ${isUser ? styles.userRow : styles.assistantRow}`}>
@@ -31,7 +42,7 @@ function FormattedContent({ content }: { content: string }) {
     if (parsed.tool || parsed.status) {
       return (
         <>
-          {parsed.tool && <><span style={{ opacity: 0.5 }}>Tool:</span> {parsed.tool}<br /></>}
+          {parsed.tool && <><span style={{ opacity: 0.5 }}>Tool:</span> {typeof parsed.tool === 'string' ? parsed.tool : parsed.tool.name || parsed.tool.id}<br /></>}
           {parsed.status && <><span style={{ opacity: 0.5 }}>Status:</span> {parsed.status}<br /></>}
           {parsed.reason && <><span style={{ opacity: 0.5 }}>Reason:</span> {parsed.reason}</>}
         </>

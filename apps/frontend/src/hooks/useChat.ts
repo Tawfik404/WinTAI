@@ -65,13 +65,21 @@ export function useChat() {
 
     try {
       const res = await sendMessage(text)
-      const content = res.response || JSON.stringify(res, null, 2)
+
+      const toolData = res.tool
+        ? { tool: res.tool, status: res.status ?? '', reason: res.reason ?? null, execution: res.execution ?? null }
+        : null
+
+      const content = toolData
+        ? (res.execution?.message as string) || res.response || ''
+        : res.response || JSON.stringify(res, null, 2)
 
       const assistantMsg: Message = {
         id: nextId(),
         role: 'assistant',
         content,
         timestamp: Date.now(),
+        ...(toolData ? { toolData } : {}),
       }
 
       setConversations(prev => prev.map(c => {

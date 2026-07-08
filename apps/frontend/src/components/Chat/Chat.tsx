@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { MessageSquare } from 'lucide-react'
 import Message from '../Message/Message'
 import ChatInput from '../ChatInput/ChatInput'
+import { ToolResponseSkeleton } from '../ToolResponseCard/ToolResponseCard'
 import type { Conversation } from '../../types'
 import styles from './Chat.module.css'
 
@@ -44,10 +45,10 @@ export default function Chat({ conversation, isLoading, onSend }: ChatProps) {
           ))}
 
           {isLoading && (
-            <div className={styles.typingIndicator}>
-              <span className={styles.typingDot} />
-              <span className={styles.typingDot} />
-              <span className={styles.typingDot} />
+            <div className={styles.assistantRow}>
+              <div className={styles.skeletonWrap}>
+                <ToolResponseSkeleton />
+              </div>
             </div>
           )}
 
